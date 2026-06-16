@@ -152,28 +152,8 @@
         }
 
         input[type="range"] {
-            -webkit-appearance: none;
             flex: 1;
-            height: 6px;
-            border-radius: 3px;
-            background: rgba(255, 255, 255, 0.1);
             outline: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: var(--accent-emerald);
-            cursor: pointer;
-            box-shadow: 0 0 10px var(--accent-emerald-glow);
-            transition: transform 0.15s ease, background-color 0.15s ease;
-        }
-
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.25);
-            background-color: #ffffff;
         }
 
         .value-display {
@@ -244,6 +224,31 @@
             font-size: 0.8rem;
             color: var(--text-muted);
             line-height: 1.5;
+        }
+
+        /* Pie de información y licencia */
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--panel-border);
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .sidebar-footer p {
+            margin: 0;
+        }
+
+        .sidebar-footer a {
+            color: var(--accent-emerald);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .sidebar-footer a:hover {
+            color: var(--text-primary);
+            text-decoration: underline;
         }
 
         /* Estilo para exponentes en forma de fracción matemática vertical clásica */
@@ -365,7 +370,7 @@
 </head>
 <body>
     <aside id="sidebar">
-        <h1>Visualizador de Potencias</h1>
+        <h1>Visualizador de Potencias en Dimensiones</h1>
 
         <div class="control-group">
             <label for="base-slider">Dimensión (Exponente)</label>
@@ -379,8 +384,20 @@
         <div class="control-group">
             <label for="base-slider">Tamaño (Base)</label>
             <div class="slider-container">
-                <input type="range" id="base-slider" min="1" max="10" value="4" step="1">
-                <div id="base-value" class="value-display">4</div>
+                <input type="range" id="base-slider" min="1" max="10" value="3" step="1" list="base-ticks">
+                <datalist id="base-ticks">
+                    <option value="1"></option>
+                    <option value="2"></option>
+                    <option value="3"></option>
+                    <option value="4"></option>
+                    <option value="5"></option>
+                    <option value="6"></option>
+                    <option value="7"></option>
+                    <option value="8"></option>
+                    <option value="9"></option>
+                    <option value="10"></option>
+                </datalist>
+                <div id="base-value" class="value-display">3</div>
             </div>
         </div>
 
@@ -396,6 +413,12 @@
                 Visualización en 1D: Línea de 4 unidades marcadas por delimitadores.
             </div>
         </div>
+
+        <footer class="sidebar-footer">
+            <p>Visualizador de Potencias en Dimensiones | © 2026</p>
+            <p>Distribuido bajo licencia <a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener noreferrer">GNU AGPLv3</a></p>
+            <p>Ver <a href="https://github.com/airvzxf/exponent-dimensions" target="_blank" rel="noopener noreferrer">Código Fuente</a></p>
+        </footer>
     </aside>
 
     <main id="viewport-container">
@@ -422,7 +445,7 @@
     <script>
         // --- Estado de la Aplicación ---
         const state = {
-            base: 4,
+            base: 3,
             exponent: 1
         };
 
@@ -908,6 +931,8 @@
 
         // --- Carga Inicial ---
         window.onload = () => {
+            state.base = parseInt(baseSlider.value, 10);
+            baseValue.textContent = state.base;
             updateView();
         };
     </script>
