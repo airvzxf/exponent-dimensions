@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador Geométrico de Potencias - Exponentes y Raíces en 1D, 2D y 3D</title>
+
+    <!-- Meta Tags de SEO Esenciales -->
+    <meta name="description" content="Visualizador geométrico interactivo de potencias y raíces. Explora conceptos matemáticos representados en 1D (línea), 2D (cuadrado) y 3D (cubo) con colores HSL dinámicos.">
+    <meta name="keywords" content="potencias matemáticas, visualización geométrica, exponente, base, raíz cuadrada, raíz cúbica, educación matemática interactiva, Three.js, WebGL">
+    <meta name="author" content="Israel Alberto Roldan Vega">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / Facebook (Para compartir en redes sociales) -->
+    <meta property="og:title" content="Visualizador Geométrico de Potencias">
+    <meta property="og:description" content="Aprende y enseña potencias y raíces con este visualizador interactivo en 3D.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://potencias.rovisoft.net/">
+    <meta property="og:image" content="https://potencias.rovisoft.net/favicon.png">
+    <meta property="og:image:secure_url" content="https://potencias.rovisoft.net/favicon.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Visualizador Geométrico de Potencias">
+    <meta name="twitter:description" content="Explora potencias matemáticas de forma geométrica en 1D, 2D y 3D interactivamente.">
+    <meta name="twitter:image" content="https://potencias.rovisoft.net/favicon.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="alternate icon" type="image/png" href="https://potencias.rovisoft.net/favicon.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+        :root {
+            --bg-dark: #09090b;
+            --panel-dark: #121216;
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --accent-emerald: #00f5d4;
+            --accent-emerald-glow: rgba(0, 245, 212, 0.35);
+            --accent-cyan: #00b4d8;
+            --text-primary: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --sidebar-width: 380px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+
+
+        /* Sidebar styling */
+        #sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--panel-dark);
+            border-right: 1px solid var(--panel-border);
+            padding: 2.25rem 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            height: 100%;
+            overflow-y: auto;
+            box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #00f5d4 0%, #00b4d8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--panel-border);
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .control-group label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        /* Segmented Capsule buttons for Exponent */
+        .exponent-selector {
+            display: flex;
+            background-color: rgba(255, 255, 255, 0.03);
+            padding: 0.35rem;
+            border-radius: 12px;
+            border: 1px solid var(--panel-border);
+            position: relative;
+            gap: 0.25rem;
+        }
+
+        .exp-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.65rem 0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+            text-align: center;
+        }
+
+        .exp-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .exp-btn.active {
+            background: linear-gradient(135deg, rgba(0, 245, 212, 0.15) 0%, rgba(0, 180, 216, 0.15) 100%);
+            color: var(--accent-emerald);
+            box-shadow: 0 0 12px rgba(0, 245, 212, 0.15);
+            border: 1px solid rgba(0, 245, 212, 0.3);
+        }
+
+        /* Custom styled slider */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--panel-border);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-emerald);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--accent-emerald-glow);
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+            background-color: #ffffff;
+        }
+
+        .value-display {
+            font-family: 'Fira Code', monospace;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--accent-emerald);
+            background: rgba(0, 245, 212, 0.08);
+            padding: 0.35rem 0.75rem;
+            border-radius: 8px;
+            min-width: 45px;
+            text-align: center;
+            border: 1px solid rgba(0, 245, 212, 0.2);
+        }
+
+        /* Math Panel with step multiplication details */
+        #math-panel {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0) 100%);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #math-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--accent-emerald), var(--accent-cyan));
+        }
+
+        .math-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .math-expression {
+            font-family: 'Fira Code', monospace;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .math-detail {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem;
+            color: var(--accent-emerald);
+            background: rgba(0, 245, 212, 0.05);
+            padding: 0.6rem 0.85rem;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 245, 212, 0.15);
+            word-break: break-all;
+        }
+
+        .dimension-info {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Estilo para exponentes en forma de fracción matemática vertical clásica */
+        .super-fraction {
+            display: inline-flex;
+            flex-direction: column;
+            vertical-align: top;
+            position: relative;
+            top: -0.35em; /* Sube la fracción para que quede como superíndice */
+            text-align: center;
+            line-height: 0.95;
+            font-size: 0.4em; /* Más pequeño para que se distinga de un producto */
+            margin-left: 0.1em;
+            margin-right: 0.1em;
+        }
+
+        .fraction-num {
+            border-bottom: 1px solid currentColor;
+            padding-bottom: 1px;
+            font-weight: 700;
+        }
+
+        .fraction-den {
+            padding-top: 1px;
+            font-weight: 700;
+        }
+
+        /* Viewport Layout */
+        #viewport-container {
+            flex: 1;
+            position: relative;
+            background-color: var(--bg-dark);
+        }
+
+        .canvas-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        .canvas-layer.active {
+            display: block;
+        }
+
+        /* Ambient glowing dots for style */
+        .ambient-glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 245, 212, 0.08) 0%, rgba(0,0,0,0) 70%);
+            top: 10%;
+            right: 10%;
+            pointer-events: none;
+        }
+
+        /* Botón flotante para subir en móvil (Evita la trampa de scroll) */
+        #scroll-to-top {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: rgba(18, 18, 22, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--panel-border);
+            color: var(--accent-emerald);
+            padding: 0.75rem 1.1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+            transform: translateY(10px);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        #scroll-to-top.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        #scroll-to-top:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--accent-emerald);
+            box-shadow: 0 0 15px rgba(0, 245, 212, 0.25);
+        }
+
+        /* Responsive Layout for Mobile and Landscape/Short Screens */
+        @media (max-width: 768px), (max-height: 580px) {
+            body {
+                flex-direction: column;
+                overflow: auto;
+                height: auto;
+            }
+            #sidebar {
+                width: 100% !important;
+                border-right: none !important;
+                border-bottom: 1px solid var(--panel-border);
+                height: auto !important;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+            }
+            #viewport-container {
+                flex: none;
+                height: 460px; /* Reducido levemente para ajustarse mejor a pantallas cortas */
+                position: relative;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <aside id="sidebar">
+        <h1>Visualizador de Potencias</h1>
+
+        <div class="control-group">
+            <label for="base-slider">Dimensión (Exponente)</label>
+            <div class="exponent-selector">
+                <button class="exp-btn active" data-exp="1" id="exp-btn-1d">1D (Línea)</button>
+                <button class="exp-btn" data-exp="2" id="exp-btn-2d">2D (Cuadrado)</button>
+                <button class="exp-btn" data-exp="3" id="exp-btn-3d">3D (Cubo)</button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label for="base-slider">Tamaño (Base)</label>
+            <div class="slider-container">
+                <input type="range" id="base-slider" min="1" max="10" value="4" step="1">
+                <div id="base-value" class="value-display">4</div>
+            </div>
+        </div>
+
+        <div id="math-panel">
+            <h2 class="math-label">Potencia Directa</h2>
+            <div id="math-output" class="math-expression">4¹ = 4</div>
+            <div id="math-steps" class="math-detail">Multiplicación: 4</div>
+
+            <h2 class="math-label" style="margin-top: 0.4rem;">Operación Inversa (Raíz)</h2>
+            <div id="math-root" class="math-expression">¹√4 = 4<sup>1/1</sup> = 4</div>
+
+            <div id="dimension-text" class="dimension-info" style="margin-top: 0.4rem;">
+                Visualización en 1D: Línea de 4 unidades marcadas por delimitadores.
+            </div>
+        </div>
+    </aside>
+
+    <main id="viewport-container">
+        <div class="ambient-glow"></div>
+
+        <!-- Canvas for 1D and 2D layers -->
+        <canvas id="canvas-2d" class="canvas-layer active"></canvas>
+
+        <!-- Container for 3D renderer -->
+        <div id="canvas-3d" class="canvas-layer"></div>
+
+        <!-- Botón flotante para volver arriba (móvil/pantallas cortas) -->
+        <button id="scroll-to-top">
+            <span>↑</span> Volver a Controles
+        </button>
+    </main>
+
+    <!-- Librerías al final para evitar bloqueo del renderizado -->
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- OrbitControls CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        // --- Estado de la Aplicación ---
+        const state = {
+            base: 4,
+            exponent: 1
+        };
+
+        // --- Elementos del DOM ---
+        const baseSlider = document.getElementById('base-slider');
+        const baseValue = document.getElementById('base-value');
+        const mathOutput = document.getElementById('math-output');
+        const mathSteps = document.getElementById('math-steps');
+        const mathRoot = document.getElementById('math-root');
+        const dimensionText = document.getElementById('dimension-text');
+        const expButtons = document.querySelectorAll('.exp-btn');
+        const canvas2d = document.getElementById('canvas-2d');
+        const container3d = document.getElementById('canvas-3d');
+        const viewportContainer = document.getElementById('viewport-container');
+
+        const ctx2d = canvas2d.getContext('2d');
+
+        // --- Configuración de Three.js ---
+        let scene, camera, renderer, controls, cubeGroup;
+        const CUBE_UNIT_SIZE = 1.2;
+        const CUBE_GAP = 0.08;
+
+        // --- Algoritmo de Coloración por Unidad (Gama HSL Dinámica) ---
+        // Genera colores únicos y secuenciales para diferenciar cada unidad visualizada
+        function getUnitColor(index, alpha = 1.0) {
+            const N = 8; // Dividir espectro en 8 colores principales
+            const hIndex = index % N;
+            const cycleIndex = Math.floor(index / N);
+
+            // Tonalidad base distribuida en los 360 grados.
+            // Rotamos 17 grados por ciclo completo para que el color no coincida exactamente en el siguiente ciclo.
+            const hue = (hIndex * (360 / N) + cycleIndex * 17) % 360;
+
+            // Variaciones sutiles de saturación y luminosidad por ciclo
+            const saturation = 85 - (cycleIndex * 5) % 15; // Oscila entre 85%, 80% y 75%
+            const lightness = 50 + (cycleIndex * 7) % 15 - 7; // Oscila levemente alrededor de 50%
+
+            return {
+                css: `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`,
+                cssOpaque: `hsl(${hue}, ${saturation}%, ${lightness}%)`,
+                hue: hue,
+                saturation: saturation,
+                lightness: lightness
+            };
+        }
+
+        function init3D() {
+            // Inicializar solo una vez
+            if (renderer) return;
+
+            scene = new THREE.Scene();
+            // Fondo oscuro a juego con la interfaz
+            scene.background = new THREE.Color(0x09090b);
+
+            const W = viewportContainer.clientWidth || window.innerWidth - 380;
+            const H = viewportContainer.clientHeight || window.innerHeight;
+
+            // Cámara con perspectiva
+            camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 1000);
+            camera.position.set(10, 10, 14);
+
+            // Renderer con antialiasing
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setSize(W, H);
+            renderer.domElement.style.display = 'block';
+            container3d.appendChild(renderer.domElement);
+
+            // OrbitControls para rotación interactiva
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxPolarAngle = Math.PI / 2 + 0.1; // Restringe mirar por debajo del suelo
+            controls.minDistance = 3;
+            controls.maxDistance = 50;
+
+            // Iluminación
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
+            scene.add(ambientLight);
+
+            // Luces de apoyo para resaltar relieve
+            const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.65);
+            dirLight1.position.set(10, 15, 10);
+            scene.add(dirLight1);
+
+            const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.35);
+            dirLight2.position.set(-10, 8, -10);
+            scene.add(dirLight2);
+
+            // Rejilla de referencia en el piso (líneas de base blancas al 90-95% para mejor visibilidad móvil)
+            const gridHelper = new THREE.GridHelper(30, 30, 0xaaaaaa, 0x606060);
+            gridHelper.position.y = 0;
+            scene.add(gridHelper);
+
+            // Iniciar ciclo de animación
+            animate3D();
+        }
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+
+            if (controls) {
+                controls.update();
+            }
+
+            if (renderer && scene && camera) {
+                renderer.render(scene, camera);
+            }
+        }
+
+        function resize3D() {
+            if (renderer && camera && state.exponent === 3) {
+                const W = viewportContainer.clientWidth;
+                const H = viewportContainer.clientHeight;
+                renderer.setSize(W, H);
+                camera.aspect = W / H;
+                camera.updateProjectionMatrix();
+            }
+        }
+
+        // --- Motores de Dibujo ---
+
+        function updateView() {
+            const B = state.base;
+            const E = state.exponent;
+
+            // 1. Cálculos matemáticos de potencia
+            const result = Math.pow(B, E);
+            mathOutput.innerHTML = `${B}<sup>${E}</sup> = ${result}`;
+
+            // Mostrar el detalle paso a paso de la multiplicación
+            let steps = [];
+            for (let i = 0; i < E; i++) {
+                steps.push(B);
+            }
+            mathSteps.textContent = `Operación: ${steps.join(' × ')} = ${result}`;
+
+            // 2. Cálculo matemático de operación inversa (Raíz) y notación de exponente fraccionario apilado
+            let rootSymbol = '√';
+            if (E === 1) rootSymbol = '¹√';
+            if (E === 3) rootSymbol = '³√';
+            // Formato de salida: ³√8 = 8^(1/3) = 2, con la fracción renderizada verticalmente con CSS flexbox
+            mathRoot.innerHTML = `${rootSymbol}${result} = ${result}<span class="super-fraction"><span class="fraction-num">1</span><span class="fraction-den">${E}</span></span> = ${B}`;
+
+            // 3. Gestionar visibilidad según dimensión
+            if (E === 3) {
+                canvas2d.classList.remove('active');
+                container3d.classList.add('active');
+
+                dimensionText.textContent = `Visualización en 3D: Cubo compuesto por un arreglo de ${B} × ${B} × ${B} (${result}) cubos unitarios de colores diferenciados. La raíz cúbica nos devuelve el tamaño del lado (${B}).`;
+
+                // Inicializar 3D si es la primera vez
+                init3D();
+                // Ajustar al tamaño correcto del contenedor
+                resize3D();
+                // Dibujar
+                draw3D();
+            } else {
+                container3d.classList.remove('active');
+                canvas2d.classList.add('active');
+
+                if (E === 1) {
+                    dimensionText.textContent = `Visualización en 1D: Línea de longitud igual a ${B} unidades, con segmentos unitarios de colores y marcadores enteros. La raíz primera nos devuelve a la base (${B}).`;
+                } else {
+                    dimensionText.textContent = `Visualización en 2D: Cuadrícula compuesta por ${B} × ${B} (${result}) cuadrados unitarios numerados. La raíz cuadrada nos devuelve el tamaño del lado (${B}).`;
+                }
+                draw2D();
+            }
+        }
+
+        function draw2D() {
+            // Ajustar el canvas al tamaño de su contenedor físico en pantalla
+            const W = viewportContainer.clientWidth;
+            const H = viewportContainer.clientHeight;
+            canvas2d.width = W;
+            canvas2d.height = H;
+
+            ctx2d.clearRect(0, 0, W, H);
+
+            const centerX = W / 2;
+            const centerY = H / 2;
+            const B = state.base;
+
+            if (state.exponent === 1) {
+                // RENDERIZADO 1D: Línea con marcas unitarias y etiquetas
+                const padding = 80;
+                const availableWidth = W - padding * 2;
+                // Ampliamos el tope del tamaño unitario de 75 a 120 para que no se vea amontonado
+                const unitSize = Math.min(availableWidth / B, 120);
+                const totalLength = B * unitSize;
+                const startX = centerX - totalLength / 2;
+                const endX = centerX + totalLength / 2;
+
+                // Eje de referencia de fondo
+                ctx2d.beginPath();
+                ctx2d.moveTo(startX - 20, centerY);
+                ctx2d.lineTo(endX + 20, centerY);
+                ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                ctx2d.lineWidth = 4;
+                ctx2d.stroke();
+
+                // Quitar brillo del canvas antes de los segmentos individuales
+                ctx2d.shadowBlur = 0;
+
+                // Dibujar marcas (ticks) y números de la línea
+                for (let i = 0; i <= B; i++) {
+                    const x = startX + i * unitSize;
+
+                    // Línea de tick
+                    ctx2d.beginPath();
+                    ctx2d.moveTo(x, centerY - 12);
+                    ctx2d.lineTo(x, centerY + 12);
+                    ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx2d.lineWidth = 2;
+                    ctx2d.stroke();
+
+                    // Etiqueta del número
+                    ctx2d.font = '600 14px "Fira Code", monospace';
+                    ctx2d.fillStyle = '#e1e1e6';
+                    ctx2d.textAlign = 'center';
+                    ctx2d.textBaseline = 'top';
+                    ctx2d.fillText(i, x, centerY + 22);
+                }
+
+                // Dibujar los segmentos de colores individuales encima
+                for (let i = 0; i < B; i++) {
+                    const x = startX + i * unitSize;
+                    const segmentColor = getUnitColor(i);
+
+                    // Línea iluminada del segmento con su color respectivo
+                    ctx2d.beginPath();
+                    ctx2d.moveTo(x, centerY);
+                    ctx2d.lineTo(x + unitSize, centerY);
+                    ctx2d.strokeStyle = segmentColor.cssOpaque;
+                    ctx2d.lineWidth = 6;
+                    ctx2d.shadowBlur = 8;
+                    ctx2d.shadowColor = segmentColor.cssOpaque;
+                    ctx2d.stroke();
+                    ctx2d.shadowBlur = 0; // Apagar sombra inmediatamente
+
+                    // Indicador de segmento (unidad "1 u") y llave superior
+                    const midX = x + unitSize / 2;
+                    ctx2d.font = '600 11px "Space Mono", monospace';
+                    ctx2d.fillStyle = segmentColor.cssOpaque;
+                    ctx2d.textAlign = 'center';
+                    ctx2d.fillText('1 u', midX, centerY - 25);
+
+                    // Llave superior de su color
+                    ctx2d.beginPath();
+                    ctx2d.moveTo(x + 6, centerY - 12);
+                    ctx2d.lineTo(x + 6, centerY - 18);
+                    ctx2d.lineTo(x + unitSize - 6, centerY - 18);
+                    ctx2d.lineTo(x + unitSize - 6, centerY - 12);
+                    ctx2d.strokeStyle = segmentColor.cssOpaque;
+                    ctx2d.lineWidth = 1.5;
+                    ctx2d.stroke();
+                }
+            } else if (state.exponent === 2) {
+                // RENDERIZADO 2D: Cuadrícula B x B con ejes y celdas multicolores
+                const paddingX = 90;
+                const paddingY = 90;
+                const availableWidth = W - paddingX * 2;
+                const availableHeight = H - paddingY * 2;
+                // Ampliamos el tope de tamaño de unidad de 65 a 100 para que se vea grande y legible
+                const unitSize = Math.min(availableWidth / B, availableHeight / B, 100);
+                const gridSize = B * unitSize;
+
+                const startX = centerX - gridSize / 2;
+                const startY = centerY - gridSize / 2;
+                const bottomY = centerY + gridSize / 2;
+
+                // Dibujar cada celda individual
+                for (let x = 0; x < B; x++) {
+                    for (let y = 0; y < B; y++) {
+                        const cellX = startX + x * unitSize;
+                        // El eje Y sube, por lo que y=0 es el fondo
+                        const cellY = bottomY - (y + 1) * unitSize;
+
+                        // Índice de la unidad en la cuadrícula
+                        const index = y * B + x;
+                        const cellColor = getUnitColor(index);
+
+                        // Relleno semi-transparente del color único de la celda
+                        ctx2d.fillStyle = getUnitColor(index, 0.16).css;
+                        ctx2d.fillRect(cellX + 2, cellY + 2, unitSize - 4, unitSize - 4);
+
+                        // Bordes de la celda unitaria con el color único
+                        ctx2d.strokeStyle = getUnitColor(index, 0.55).css;
+                        ctx2d.lineWidth = 1.5;
+                        ctx2d.strokeRect(cellX, cellY, unitSize, unitSize);
+
+                        // Escribir la coordenada interna con el color de la celda
+                        ctx2d.font = '600 11px "Fira Code", monospace';
+                        ctx2d.fillStyle = cellColor.cssOpaque;
+                        ctx2d.textAlign = 'center';
+                        ctx2d.textBaseline = 'middle';
+                        ctx2d.fillText(`${x},${y}`, cellX + unitSize / 2, cellY + unitSize / 2);
+                    }
+                }
+
+                // Borde exterior del cuadrado en blanco semi-transparente para englobar el plano
+                ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx2d.lineWidth = 3;
+                ctx2d.strokeRect(startX, startY, gridSize, gridSize);
+
+                // Eje X (Línea horizontal en la base)
+                ctx2d.beginPath();
+                ctx2d.moveTo(startX - 30, bottomY);
+                ctx2d.lineTo(startX + gridSize + 30, bottomY);
+                ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx2d.lineWidth = 2;
+                ctx2d.stroke();
+
+                // Eje Y (Línea vertical en el extremo izquierdo)
+                ctx2d.beginPath();
+                ctx2d.moveTo(startX, bottomY + 30);
+                ctx2d.lineTo(startX, startY - 30);
+                ctx2d.stroke();
+
+                // Ticks y Etiquetas del Eje X
+                for (let i = 0; i <= B; i++) {
+                    const x = startX + i * unitSize;
+
+                    ctx2d.beginPath();
+                    ctx2d.moveTo(x, bottomY);
+                    ctx2d.lineTo(x, bottomY + 8);
+                    ctx2d.strokeStyle = '#a1a1aa';
+                    ctx2d.lineWidth = 1.5;
+                    ctx2d.stroke();
+
+                    ctx2d.font = '600 12px "Fira Code", monospace';
+                    ctx2d.fillStyle = '#e1e1e6';
+                    ctx2d.textAlign = 'center';
+                    ctx2d.textBaseline = 'top';
+                    ctx2d.fillText(i, x, bottomY + 12);
+                }
+
+                // Ticks y Etiquetas del Eje Y
+                for (let j = 0; j <= B; j++) {
+                    const y = bottomY - j * unitSize;
+
+                    ctx2d.beginPath();
+                    ctx2d.moveTo(startX, y);
+                    ctx2d.lineTo(startX - 8, y);
+                    ctx2d.strokeStyle = '#a1a1aa';
+                    ctx2d.lineWidth = 1.5;
+                    ctx2d.stroke();
+
+                    ctx2d.font = '600 12px "Fira Code", monospace';
+                    ctx2d.fillStyle = '#e1e1e6';
+                    ctx2d.textAlign = 'right';
+                    ctx2d.textBaseline = 'middle';
+                    ctx2d.fillText(j, startX - 14, y);
+                }
+            }
+        }
+
+        // --- Renderizado 3D ---
+        function draw3D() {
+            if (!scene) return;
+
+            // Eliminar grupo anterior para regenerar
+            if (cubeGroup) scene.remove(cubeGroup);
+
+            cubeGroup = new THREE.Group();
+
+            const B = state.base;
+            const S = CUBE_UNIT_SIZE;
+            const size = S - CUBE_GAP;
+
+            // Geometría compartida para optimizar
+            const geometry = new THREE.BoxGeometry(size, size, size);
+
+            // Generar el cubo de cubos (BxBxB)
+            for (let x = 0; x < B; x++) {
+                for (let y = 0; y < B; y++) {
+                    for (let z = 0; z < B; z++) {
+                        // Calcular posición espacial (centrado en XZ, apoyado en el suelo Y=0)
+                        const posX = (x - (B - 1) / 2) * S;
+                        const posY = (y + 0.5) * S;
+                        const posZ = (z - (B - 1) / 2) * S;
+
+                        // Índice de unidad único 3D
+                        const index = z * B * B + y * B + x;
+                        const colorData = getUnitColor(index);
+
+                        // Crear color de Three.js de manera segura usando .setHSL() para evitar fallos de compatibilidad en el constructor
+                        const colorHex = new THREE.Color();
+                        colorHex.setHSL(colorData.hue / 360, colorData.saturation / 100, colorData.lightness / 100);
+
+                        // Material físico con soporte de iluminación y transparencias internas
+                        const material = new THREE.MeshStandardMaterial({
+                            color: colorHex,
+                            transparent: true,
+                            opacity: 0.35,
+                            roughness: 0.2,
+                            metalness: 0.1,
+                            side: THREE.DoubleSide
+                        });
+
+                        const mesh = new THREE.Mesh(geometry, material);
+                        mesh.position.set(posX, posY, posZ);
+
+                        // Bordes de cada cubo individual del color único respectivo para resaltar las divisiones
+                        const edgesGeometry = new THREE.EdgesGeometry(geometry);
+                        const lineMaterial = new THREE.LineBasicMaterial({
+                            color: colorHex,
+                            transparent: true,
+                            opacity: 0.8
+                        });
+                        const wireframe = new THREE.LineSegments(edgesGeometry, lineMaterial);
+                        mesh.add(wireframe);
+
+                        cubeGroup.add(mesh);
+                    }
+                }
+            }
+
+            scene.add(cubeGroup);
+
+            // Reposicionar cámara dinámicamente según el tamaño del cubo
+            const distance = Math.max(B * S * 2.1, 7.5);
+            camera.position.set(distance * 0.9, distance * 0.8, distance * 1.15);
+
+            // Establecer el centro de rotación en el baricentro del cubo
+            const targetY = (B * S) / 2;
+            controls.target.set(0, targetY, 0);
+
+            controls.update();
+        }
+
+        // --- Manejo de Eventos ---
+
+        baseSlider.addEventListener('input', (e) => {
+            state.base = parseInt(e.target.value, 10);
+            baseValue.textContent = state.base;
+            updateView();
+        });
+
+        expButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                expButtons.forEach(b => b.classList.remove('active'));
+
+                // Soporte si se clickea en algún elemento interno del botón
+                const targetBtn = e.target.closest('.exp-btn');
+                targetBtn.classList.add('active');
+
+                state.exponent = parseInt(targetBtn.getAttribute('data-exp'), 10);
+                updateView();
+            });
+        });
+
+        // --- Observador de Cambios de Tamaño (ResizeObserver) ---
+        // Esto soluciona los problemas de dimensiones en dispositivos móviles y modo responsivo
+        const resizeObserver = new ResizeObserver(() => {
+            if (state.exponent !== 3) {
+                draw2D();
+            } else {
+                resize3D();
+                draw3D(); // Asegura reposicionamiento de cámara al cambiar de tamaño
+            }
+        });
+        resizeObserver.observe(viewportContainer);
+
+        // --- Botón Volver Arriba (Evita trampa de scroll en móvil) ---
+        const scrollToTopBtn = document.getElementById('scroll-to-top');
+
+        window.addEventListener('scroll', () => {
+            // Mostrar botón si hemos hecho scroll vertical (mayor a 180px)
+            if (window.scrollY > 180) {
+                scrollToTopBtn.classList.add('visible');
+            } else {
+                scrollToTopBtn.classList.remove('visible');
+            }
+        });
+
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // --- Carga Inicial ---
+        window.onload = () => {
+            updateView();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Definición del filtro de sombra para dar un efecto premium de relieve -->
+  <defs>
+    <filter id="drop-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="4" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Círculo de fondo con el color Oxford Slate/Teal extraído (3a4e4d) -->
+  <circle cx="256" cy="256" r="240" fill="#3a4e4d" />
+
+  <!-- Grupo contenedor con filtro de sombra -->
+  <g filter="url(#drop-shadow)">
+    <!-- Letra 'x' de color cian brillante (01aef2) en cursiva matemática, más grande y centrada -->
+    <text x="195" y="350" 
+          font-family="'Cambria Math', 'Georgia', 'Times New Roman', 'Liberation Serif', serif" 
+          font-style="italic" 
+          font-size="330" 
+          fill="#01aef2" 
+          text-anchor="middle">x</text>
+    
+    <!-- Letra 'n' de color amarillo brillante (fcd731) como superíndice en cursiva matemática, posicionada arriba a la derecha -->
+    <text x="360" y="200" 
+          font-family="'Cambria Math', 'Georgia', 'Times New Roman', 'Liberation Serif', serif" 
+          font-style="italic" 
+          font-size="190" 
+          fill="#fcd731" 
+          text-anchor="middle">n</text>
+  </g>
+</svg>
