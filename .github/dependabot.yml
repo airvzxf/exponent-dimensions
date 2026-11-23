@@ -9,6 +9,10 @@ updates:
     labels:
       - "dependencies"
       - "github-actions"
+    # Commits convencionales: "ci(deps): bump ...", como en moagan.
+    commit-message:
+      prefix: "ci"
+      include: "scope"
     groups:
       actions:
         patterns: ["*"]
@@ -23,6 +27,10 @@ updates:
     labels:
       - "dependencies"
       - "javascript"
+    # Son dependencias de las pruebas: "test(deps): bump ...".
+    commit-message:
+      prefix: "test"
+      include: "scope"
     groups:
       test-deps:
         patterns: ["*"]
