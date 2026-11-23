@@ -7,6 +7,8 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-23
+
 Primera versión numerada. Hasta ahora el sitio se publicaba sin versiones.
 
 ### Añadido
@@ -59,4 +61,5 @@ Primera versión numerada. Hasta ahora el sitio se publicaba sin versiones.
 - El texto inicial de la página coincide con lo que dibuja la app.
 - Las etiquetas del formulario apuntan a su control.
 
-[Unreleased]: https://github.com/airvzxf/exponent-dimensions/commits/main
+[1.0.0]: https://github.com/airvzxf/exponent-dimensions/releases/tag/v1.0.0
+[Unreleased]: https://github.com/airvzxf/exponent-dimensions/compare/v1.0.0...HEAD
