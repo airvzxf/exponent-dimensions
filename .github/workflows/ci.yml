@@ -1,0 +1,121 @@
+name: CI
+
+# Disparadores: push a main, cualquier pull request y ejecución manual.
+# Los tags no lo disparan: de ellos se encarga release.yml.
+# Los jobs son independientes (ninguno declara `needs:`), así que corren
+# en paralelo y un fallo en uno no oculta el resultado de los demás.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Una ejecución por ref. Los PR cancelan la ejecución anterior al recibir
+# un push nuevo; main y las ejecuciones manuales no, para que un fallo
+# quede visible en la pestaña Actions mientras llega la corrección.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  actionlint:
+    name: actionlint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Binario oficial verificado por sha256 en lugar de una acción
+      # envoltorio. Al subir de versión hay que cambiar las dos líneas:
+      # sha= es la entrada actionlint_<ver>_linux_amd64.tar.gz del archivo
+      # actionlint_<ver>_checksums.txt de la release.
+      - name: Install actionlint
+        run: |
+          set -eu
+          ver=1.7.12
+          sha=8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+          curl -fsSL -o /tmp/actionlint.tar.gz \
+            "https://github.com/rhysd/actionlint/releases/download/v${ver}/actionlint_${ver}_linux_amd64.tar.gz"
+          echo "${sha}  /tmp/actionlint.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/actionlint.tar.gz -C /tmp actionlint
+          sudo mv /tmp/actionlint /usr/local/bin/actionlint
+          actionlint --version
+      - name: Run actionlint
+        run: make actionlint
+
+  html-validate:
+    name: HTML
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - name: Validate src/index.html
+        run: make html-validate
+
+  js-check:
+    name: JavaScript syntax
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - name: node --check
+        run: make js-check
+
+  # Abre la app en el Chrome del runner: las cuatro dimensiones, la
+  # vista 3D con WebGL (SwiftShader), corte, URL, idioma, teclado,
+  # diseño móvil y el aviso cuando el CDN de Three.js no responde.
+  smoke:
+    name: Smoke test (Chrome)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - name: Run the smoke test
+        run: |
+          CHROME_PATH="$(command -v google-chrome)"
+          export CHROME_PATH
+          "${CHROME_PATH}" --version
+          make smoke
+
+  lighthouse:
+    name: Lighthouse
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      # Umbrales en lighthouserc.json: accesibilidad < 0.9 falla el job;
+      # rendimiento, buenas prácticas y SEO solo avisan.
+      - name: Run Lighthouse CI
+        run: make lighthouse
+      - name: Upload the Lighthouse report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/
+          retention-days: 14
+          if-no-files-found: ignore
