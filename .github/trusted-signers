@@ -1,0 +1,10 @@
+# Llaves autorizadas para firmar tags de release.
+#
+# release.yml (job verify-tag-signature) lee este archivo desde
+# origin/main y lo usa como gpg.ssh.allowedsignersfile. git compara por
+# la llave, no por el nombre del principal: cada línea es una
+# autorización completa.
+#
+# Formato: <principal> <tipo-de-llave> <llave>
+# Llave actual: ED25519, huella SHA256:POu2Sr8ILb1IM05Vh1cGU3xivjx05QjWoWYhdLc6YHA
+airvzxf ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPq6Zvvu+eTZQ0hUb/vHC5EfPEGvy1hTc0Psq9W2TMdz
