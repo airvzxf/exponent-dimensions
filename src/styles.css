@@ -1,0 +1,544 @@
+:root {
+    --bg-dark: #09090b;
+    --panel-dark: #121216;
+    --panel-border: rgba(255, 255, 255, 0.08);
+    --accent-emerald: #00f5d4;
+    --accent-emerald-glow: rgba(0, 245, 212, 0.35);
+    --accent-cyan: #00b4d8;
+    --text-primary: #f4f4f5;
+    --text-muted: #a1a1aa;
+    --sidebar-width: 380px;
+    --focus-ring: 0 0 0 2px var(--bg-dark), 0 0 0 4px var(--accent-emerald);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    display: flex;
+    height: 100vh;
+    height: 100dvh; /* descuenta las barras del navegador en móvil */
+    overflow: hidden;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+/* Foco visible solo al navegar con teclado */
+:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+/* Sidebar */
+#sidebar {
+    width: var(--sidebar-width);
+    flex-shrink: 0;
+    background-color: var(--panel-dark);
+    border-right: 1px solid var(--panel-border);
+    padding: 2.25rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    height: 100%;
+    overflow-y: auto;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+}
+
+/* Sin esto, el panel matemático se aplasta cuando la barra lateral tiene scroll */
+#sidebar > * {
+    flex-shrink: 0;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--panel-border);
+}
+
+h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #00f5d4 0%, #00b4d8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.lang-switch {
+    display: flex;
+    gap: 0.15rem;
+    padding: 0.2rem;
+    border-radius: 8px;
+    border: 1px solid var(--panel-border);
+    flex-shrink: 0;
+}
+
+.lang-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font: 600 0.7rem 'Fira Code', monospace;
+    padding: 0.3rem 0.45rem;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.lang-btn[aria-pressed="true"] {
+    color: var(--accent-emerald);
+    background: rgba(0, 245, 212, 0.1);
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.control-group > label,
+.group-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+}
+
+/* Botones segmentados para el exponente */
+.exponent-selector {
+    display: flex;
+    background-color: rgba(255, 255, 255, 0.03);
+    padding: 0.35rem;
+    border-radius: 12px;
+    border: 1px solid var(--panel-border);
+    gap: 0.25rem;
+}
+
+.exp-btn {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    padding: 0.5rem 0;
+    font-family: inherit;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+}
+
+.exp-dim {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.exp-name {
+    font-size: 0.68rem;
+    font-weight: 500;
+}
+
+.exp-btn:hover {
+    color: var(--text-primary);
+}
+
+.exp-btn.active {
+    background: linear-gradient(135deg, rgba(0, 245, 212, 0.15) 0%, rgba(0, 180, 216, 0.15) 100%);
+    color: var(--accent-emerald);
+    box-shadow: 0 0 12px rgba(0, 245, 212, 0.15);
+    border-color: rgba(0, 245, 212, 0.3);
+}
+
+/* El radio nativo queda oculto visualmente pero accesible; la etiqueta hace de botón */
+.exp-btn input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+}
+
+.exp-btn:has(input:focus-visible) {
+    box-shadow: var(--focus-ring);
+}
+
+fieldset.control-group {
+    border: none;
+    min-width: 0;
+}
+
+fieldset.control-group legend {
+    padding: 0;
+    margin-bottom: 0.85rem;
+}
+
+/* Sliders */
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--panel-border);
+}
+
+input[type="range"] {
+    flex: 1;
+    min-width: 0;
+    accent-color: var(--accent-emerald);
+    border-radius: 4px;
+}
+
+.value-display {
+    font-family: 'Fira Code', monospace;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--accent-emerald);
+    background: rgba(0, 245, 212, 0.08);
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    min-width: 45px;
+    text-align: center;
+    border: 1px solid rgba(0, 245, 212, 0.2);
+    white-space: nowrap;
+}
+
+/* Opciones de vista */
+.view-options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 1rem;
+}
+
+.toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.toggle input {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--accent-emerald);
+}
+
+.ghost-btn {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--panel-border);
+    color: var(--accent-emerald);
+    font: 600 0.8rem 'Plus Jakarta Sans', sans-serif;
+    padding: 0.5rem 0.85rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.ghost-btn:hover:not(:disabled) {
+    border-color: var(--accent-emerald);
+    background: rgba(0, 245, 212, 0.06);
+}
+
+.ghost-btn:disabled {
+    color: var(--text-muted);
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Panel matemático */
+#math-panel {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0) 100%);
+    border: 1px solid var(--panel-border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+#math-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--accent-emerald), var(--accent-cyan));
+}
+
+.math-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.math-label-spaced {
+    margin-top: 0.4rem;
+}
+
+.math-expression {
+    font-family: 'Fira Code', monospace;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.math-note {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.math-detail {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.95rem;
+    color: var(--accent-emerald);
+    background: rgba(0, 245, 212, 0.05);
+    padding: 0.6rem 0.85rem;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 245, 212, 0.15);
+    overflow-wrap: anywhere;
+}
+
+.dimension-info {
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* Exponente fraccionario apilado verticalmente */
+.super-fraction {
+    display: inline-flex;
+    flex-direction: column;
+    vertical-align: top;
+    position: relative;
+    top: -0.35em; /* lo sube para que funcione como superíndice */
+    text-align: center;
+    line-height: 0.95;
+    font-size: 0.4em; /* más pequeño para que no se confunda con un producto */
+    margin-left: 0.1em;
+    margin-right: 0.1em;
+}
+
+.fraction-num {
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 1px;
+    font-weight: 700;
+}
+
+.fraction-den {
+    padding-top: 1px;
+    font-weight: 700;
+}
+
+/* Sección de aplicaciones reales */
+.applications {
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.applications summary {
+    cursor: pointer;
+    padding: 0.85rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent-emerald);
+    border-radius: 12px;
+}
+
+.applications-body {
+    padding: 0 1rem 1rem;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
+.applications-body p {
+    margin-bottom: 0.75rem;
+}
+
+.applications-body ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding-left: 1.1rem;
+}
+
+.applications-body strong {
+    color: var(--text-primary);
+}
+
+/* Pie de información y licencia */
+.sidebar-footer {
+    margin-top: auto;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--panel-border);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.sidebar-footer a {
+    color: var(--accent-emerald);
+    text-decoration: underline;
+    text-decoration-color: rgba(0, 245, 212, 0.4);
+    text-underline-offset: 2px;
+    transition: color 0.2s ease;
+}
+
+.sidebar-footer a:hover {
+    color: var(--text-primary);
+    text-decoration-color: currentColor;
+}
+
+/* Área de visualización */
+#viewport-container {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    background-color: var(--bg-dark);
+}
+
+.canvas-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+}
+
+.canvas-layer.active {
+    display: block;
+}
+
+.ambient-glow {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 245, 212, 0.08) 0%, rgba(0, 0, 0, 0) 70%);
+    top: 10%;
+    right: 10%;
+    pointer-events: none;
+}
+
+.error-3d,
+.noscript {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: min(90%, 360px);
+    height: fit-content;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    background: var(--panel-dark);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+}
+
+/* Botón flotante para volver arriba en móvil */
+#scroll-to-top {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    background: rgba(18, 18, 22, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--panel-border);
+    color: var(--accent-emerald);
+    padding: 0.75rem 1.1rem;
+    border-radius: 20px;
+    font: 700 0.85rem 'Plus Jakarta Sans', sans-serif;
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s, border-color 0.15s ease, box-shadow 0.15s ease;
+    transform: translateY(10px);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+#scroll-to-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+#scroll-to-top:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--accent-emerald);
+    box-shadow: 0 0 15px rgba(0, 245, 212, 0.25);
+}
+
+/* Móvil y pantallas bajas (horizontal): diseño vertical con scroll */
+@media (max-width: 768px), (max-height: 580px) {
+    body {
+        flex-direction: column;
+        overflow: auto;
+        height: auto;
+    }
+
+    #sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--panel-border);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        padding: 1.75rem 1rem;
+    }
+
+    #viewport-container {
+        flex: none;
+        height: 460px;
+        width: 100%;
+    }
+}
+
+/* Respetar la preferencia de reducir animaciones */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
