@@ -7,6 +7,26 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-23
+
+### Corregido
+
+- **Archivos viejos en caché tras una actualización:** producción guarda
+  JS y CSS un año en el navegador, así que un visitante que ya había
+  entrado recibía el HTML nuevo con el JS y el CSS anteriores. Ahora
+  `styles.css`, `app.js` y los módulos que importa (`i18n.js`,
+  `scene3d.js`) se piden con `?v=<versión>` y cada versión usa URLs
+  nuevas.
+
+### Añadido
+
+- Prueba unitaria (`make unit`) que falla si algún recurso o `import`
+  local no lleva `?v=` igual a `VERSION`.
+- Job de CI que falla si un PR cambia JS o CSS de `src/` sin subir la
+  versión, y la regla documentada en el README ("Versiones").
+- La validación posterior a la release pide JS y CSS con la URL
+  `?v=<versión>` que usa el navegador.
+
 ## [1.0.0] - 2026-11-23
 
 Primera versión numerada. Hasta ahora el sitio se publicaba sin versiones.
@@ -61,5 +81,6 @@ Primera versión numerada. Hasta ahora el sitio se publicaba sin versiones.
 - El texto inicial de la página coincide con lo que dibuja la app.
 - Las etiquetas del formulario apuntan a su control.
 
+[1.0.1]: https://github.com/airvzxf/exponent-dimensions/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/airvzxf/exponent-dimensions/releases/tag/v1.0.0
-[Unreleased]: https://github.com/airvzxf/exponent-dimensions/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/airvzxf/exponent-dimensions/compare/v1.0.1...HEAD
