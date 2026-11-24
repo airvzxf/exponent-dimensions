@@ -67,6 +67,43 @@ body {
     border-bottom: 1px solid var(--panel-border);
 }
 
+/* Título y enlace a exponent-plot, siempre visibles al cargar */
+.header-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    min-width: 0;
+}
+
+.related-link {
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--accent-emerald);
+    text-decoration: underline;
+    text-decoration-color: rgba(0, 245, 212, 0.5);
+    text-underline-offset: 2px;
+    transition: color 0.2s ease;
+}
+
+.related-link:hover {
+    color: var(--text-primary);
+    text-decoration-color: currentColor;
+}
+
+/* Visible solo para lectores de pantalla */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 h1 {
     font-size: 1.4rem;
     font-weight: 700;
