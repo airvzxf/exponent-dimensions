@@ -75,6 +75,61 @@ jobs:
       - name: node --check
         run: make js-check
 
+  # Cada recurso local de index.html y cada import relativo entre
+  # módulos lleva ?v=<VERSION> (ver README, "Versiones").
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - name: node --test
+        run: make unit
+
+  # Producción guarda JS y CSS un año en el navegador y Cloudflare Pages
+  # publica en cuanto se fusiona el PR. Por eso un PR que cambia JS o CSS
+  # de src/ debe subir VERSION (y con ella los ?v=) en el mismo PR.
+  asset-version:
+    name: Asset version bumped
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fail if src/ JS or CSS changed without a version bump
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          base="$(git merge-base "${BASE_SHA}" "${HEAD_SHA}")"
+          changed="$(git diff --name-only "${base}" "${HEAD_SHA}" -- 'src/*.js' 'src/*.css')"
+          if [ -z "${changed}" ]; then
+            echo "✓ no JavaScript or CSS changes in src/"
+            exit 0
+          fi
+          old="$(git show "${base}:VERSION" 2>/dev/null | head -n1 | tr -d '[:space:]')" || old=""
+          new="$(git show "${HEAD_SHA}:VERSION" | head -n1 | tr -d '[:space:]')"
+          if [ "${old}" = "${new}" ]; then
+            {
+              echo "::error::src/ JavaScript or CSS changed but VERSION is still ${old}."
+              echo "Changed files:"
+              echo "${changed}"
+              echo "Bump VERSION, the ?v= URLs in src/ and the CHANGELOG section in this PR; see README 'Versiones'."
+            } >&2
+            exit 1
+          fi
+          echo "✓ version ${old:-none} → ${new} for:"
+          echo "${changed}"
+
   # Abre la app en el Chrome del runner: las cuatro dimensiones, la
   # vista 3D con WebGL (SwiftShader), corte, URL, idioma, teclado,
   # diseño móvil y el aviso cuando el CDN de Three.js no responde.
