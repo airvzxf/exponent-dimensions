@@ -1,4 +1,4 @@
-import { STRINGS, LANGS } from './i18n.js';
+import { STRINGS, LANGS } from './i18n.js?v=1.0.1';
 
 // --- Estado de la aplicación ---
 const MIN_BASE = 1;
@@ -370,7 +370,7 @@ let scene3dPromise = null;
 
 function load3D() {
     if (!scene3dPromise) {
-        scene3dPromise = import('./scene3d.js')
+        scene3dPromise = import('./scene3d.js?v=1.0.1')
             .then(({ createScene3D }) => {
                 scene3d = createScene3D(container3d, { getUnitColor, reducedMotion: reducedMotion() });
                 scene3d.setBase(state.base);

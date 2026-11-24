@@ -80,6 +80,10 @@ jobs:
       - name: Compare every file in src/ with production
         run: |
           set -euo pipefail
+          version="$(head -n1 VERSION | tr -d '[:space:]')"
+          # Pages ignora el query string y responde a rutas inexistentes con
+          # index.html y estado 200, así que se compara el contenido, no el
+          # estado HTTP.
           # Hasta 10 minutos: el despliegue de Pages suele tardar menos de uno.
           for attempt in $(seq 1 20); do
             mismatches=0
@@ -87,6 +91,11 @@ jobs:
               path="${file#src/}"
               # Pages redirige /index.html a /, así que se pide la raíz.
               [ "${path}" = index.html ] && path=""
+              # JS y CSS se piden con la URL que usa el navegador
+              # (?v=<VERSION>), la que entra en su caché de un año.
+              case "${path}" in
+                *.js|*.css) path="${path}?v=${version}" ;;
+              esac
               expected="$(sha256sum "${file}" | cut -d' ' -f1)"
               actual="$(curl -fsSL --retry 2 -H 'Cache-Control: no-cache' "${SITE_URL}${path}" | sha256sum | cut -d' ' -f1)" || actual="download-failed"
               if [ "${expected}" != "${actual}" ]; then
