@@ -5,14 +5,15 @@ HTML_VALIDATE_VERSION := 11.18.0
 LHCI_VERSION := 0.16.0
 PORT ?= 8000
 
-.PHONY: help serve lint html-validate js-check actionlint test test-deps smoke lighthouse check
+.PHONY: help serve lint html-validate js-check actionlint test test-deps unit smoke lighthouse check
 
 help:
 	@echo "make serve       Sirve src/ en http://localhost:$(PORT)"
 	@echo "make lint        html-validate + sintaxis JS (+ actionlint si está instalado)"
+	@echo "make unit        Pruebas unitarias (node --test, sin navegador)"
 	@echo "make smoke       Prueba de humo en Chrome headless (CHROME_PATH opcional)"
 	@echo "make lighthouse  Lighthouse CI sobre src/"
-	@echo "make check       lint + smoke"
+	@echo "make check       lint + unit + smoke"
 
 serve:
 	python3 -m http.server $(PORT) --directory src
@@ -33,12 +34,15 @@ actionlint:
 test-deps:
 	npm ci --prefix tests --no-audit --no-fund
 
+unit:
+	node --test tests/*.test.mjs
+
 smoke: test-deps
 	node tests/smoke.mjs
 
-test: smoke
+test: unit smoke
 
 lighthouse:
 	npx --yes @lhci/cli@$(LHCI_VERSION) autorun
 
-check: lint smoke
+check: lint unit smoke
