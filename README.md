@@ -25,6 +25,7 @@ La app incluye ejemplos reales de esta idea: tomografías y resonancias (un volu
 - **Panel matemático:** potencia, desglose de la multiplicación y operación inversa con exponente fraccionario.
 - **Colores coherentes entre dimensiones:** la línea 1D es la fila inferior de la cuadrícula 2D, y la cuadrícula 2D es la primera capa del cubo.
 - **Enlaces compartibles:** el estado se guarda en la URL, por ejemplo [`#b=4&e=3&lang=es`](https://exponent-dimensions.rovisoft.net/#b=4&e=3&lang=es).
+- **Enlace a [exponent-plot](https://exponent-plot.rovisoft.net/):** el visualizador hermano de exponentes positivos y negativos (base 0–4, exponente −4…4) abre la misma potencia y el mismo idioma. Si la base pasa de 4 se muestra con base 4 y el enlace lo avisa.
 - **Español e inglés**, con detección automática del idioma del navegador.
 - **Accesible:** navegación con teclado, foco visible, descripciones para lectores de pantalla y respeto a `prefers-reduced-motion`.
 - **Diseño responsivo:** en móviles y pantallas bajas usa un layout vertical con botón para volver a los controles.
@@ -46,6 +47,7 @@ exponent-dimensions/
 ├── docs/                     # Imágenes del README (no se publican)
 ├── tests/
 │   ├── assets.test.mjs       # Cada recurso e import local lleva ?v=VERSION
+│   ├── plot-link.test.mjs    # Mapeo del enlace hacia exponent-plot
 │   └── smoke.mjs             # Prueba de humo en Chrome headless
 └── src/                      # Sitio estático publicado
     ├── index.html            # Estructura, metadatos e import map de Three.js
@@ -53,6 +55,7 @@ exponent-dimensions/
     ├── app.js                # Estado, controles, dibujo 0D–2D y animaciones
     ├── scene3d.js            # Escena 3D (se carga solo al abrir la vista 3D)
     ├── i18n.js               # Textos en español e inglés
+    ├── plot-link.js          # Enlace hacia exponent-plot (mismo formato de hash)
     ├── favicon.svg / favicon.png / apple-touch-icon.png
     └── og-image.png          # Vista previa para redes sociales (1200×630)
 ```
@@ -86,7 +89,7 @@ Las versiones siguen [SemVer](https://semver.org/lang/es/) y se anotan en [CHANG
 Producción guarda JS y CSS en la caché del navegador durante un año (`max-age=31536000`), mientras que el HTML no se guarda (`max-age=0`). Para que un visitante nunca combine el HTML nuevo con un script viejo, cada recurso local lleva la versión en la URL:
 
 - `styles.css?v=X.Y.Z` y `app.js?v=X.Y.Z` en `src/index.html`;
-- los `import` relativos entre módulos (`./i18n.js?v=X.Y.Z`, `./scene3d.js?v=X.Y.Z`).
+- los `import` relativos entre módulos (`./i18n.js?v=X.Y.Z`, `./plot-link.js?v=X.Y.Z`, `./scene3d.js?v=X.Y.Z`).
 
 Cloudflare Pages ignora el query string al servir: solo cambia la clave de caché del navegador.
 
