@@ -46,8 +46,8 @@ y su página de GitHub Release con el zip de `src/`.
 
 | Nivel | Dónde | Qué |
 |---|---|---|
-| Local | `make check` | html-validate, sintaxis JS, actionlint (si está instalado) y prueba de humo |
-| PR / main | `ci.yml` | lo mismo más Lighthouse (accesibilidad < 0.9 falla) |
+| Local | `make check` | html-validate, sintaxis JS, actionlint (si está instalado), `?v=` igual a `VERSION` y prueba de humo |
+| PR / main | `ci.yml` | lo mismo más Lighthouse (accesibilidad < 0.9 falla); en PR, `asset-version` falla si cambia JS/CSS de `src/` sin subir `VERSION` |
 | Tag | `release.yml` | tag válido, alcanzable desde `main`, firmado, `VERSION` y `CHANGELOG` coherentes |
 | Tras la release | `post-release-validation.yml` | producción sirve los archivos del tag y pasa la prueba de humo |
 
@@ -56,6 +56,13 @@ y su página de GitHub Release con el zip de `src/`.
 Un tag es irreversible, así que cada workflow se prueba en verde mientras
 el cambio aún se puede revertir.
 
+0. **Regla de versiones.** Producción guarda JS y CSS un año en el
+   navegador y Pages publica en cuanto se fusiona. Un PR que cambia
+   `src/*.js` o `src/*.css` sube la versión **en ese mismo PR** (es el PR
+   de release): `VERSION`, todos los `?v=` de `src/` (recursos de
+   `index.html` e `import` relativos) y la sección
+   `## [X.Y.Z] - AAAA-MM-DD` del CHANGELOG. Los PRs que no tocan JS ni
+   CSS de `src/` no necesitan versión. Detalle en el README, "Versiones".
 1. Rama desde `main`, commits firmados, push y PR.
 2. Esperar el CI del PR. Si algo sale rojo: leer el log
    (`gh run view <id> --log-failed`), corregir, push y volver a esperar.
@@ -65,10 +72,12 @@ el cambio aún se puede revertir.
 5. Esperar el CI de `main` y el despliegue de Cloudflare Pages del commit
    del merge (checks del commit). Si algo sale rojo, se corrige en un PR
    nuevo antes de seguir.
-6. PR de release `chore(release): vX.Y.Z`: `VERSION` con `X.Y.Z` y la
-   sección `## [Unreleased]` del CHANGELOG renombrada a
+6. Si el cambio no tocó JS ni CSS de `src/` pero se quiere publicar una
+   versión, PR de release `chore(release): vX.Y.Z`: `VERSION` y los `?v=`
+   con `X.Y.Z` y la sección `## [Unreleased]` del CHANGELOG renombrada a
    `## [X.Y.Z] - AAAA-MM-DD`, con su enlace de comparación al pie.
-   Esperar su CI y hacer squash merge.
+   Esperar su CI y hacer squash merge. Si el PR ya subió la versión
+   (regla del paso 0), pasar directo al paso 7.
 7. Etiquetar el **commit del merge en `main`**, no la punta de la rama
    (el squash cambia el SHA):
 

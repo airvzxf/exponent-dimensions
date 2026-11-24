@@ -35,16 +35,18 @@ La app incluye ejemplos reales de esta idea: tomografías y resonancias (un volu
 exponent-dimensions/
 ├── .github/
 │   ├── workflows/
-│   │   ├── ci.yml                       # actionlint, HTML, JS, prueba de humo y Lighthouse
+│   │   ├── ci.yml                       # actionlint, HTML, JS, unitarias, versión, humo y Lighthouse
 │   │   ├── release.yml                  # Release al publicar un tag vX.Y.Z firmado
 │   │   └── post-release-validation.yml  # Producción sirve el tag y pasa la prueba de humo
 │   ├── dependabot.yml
 │   └── trusted-signers                  # Llaves que pueden firmar tags
 ├── AGENTS.md                 # Convenciones y proceso de release
 ├── CHANGELOG.md
-├── Makefile                  # serve, lint, smoke, lighthouse, check
+├── Makefile                  # serve, lint, unit, smoke, lighthouse, check
 ├── docs/                     # Imágenes del README (no se publican)
-├── tests/smoke.mjs           # Prueba de humo en Chrome headless
+├── tests/
+│   ├── assets.test.mjs       # Cada recurso e import local lleva ?v=VERSION
+│   └── smoke.mjs             # Prueba de humo en Chrome headless
 └── src/                      # Sitio estático publicado
     ├── index.html            # Estructura, metadatos e import map de Three.js
     ├── styles.css
@@ -67,7 +69,7 @@ make serve        # o: python3 -m http.server 8000 --directory src
 
 Luego visita `http://localhost:8000`.
 
-Para validar lo mismo que el CI (HTML, sintaxis JS y una prueba de humo en Chrome headless):
+Para validar lo mismo que el CI (HTML, sintaxis JS, pruebas unitarias y una prueba de humo en Chrome headless):
 
 ```bash
 make check        # CHROME_PATH=/ruta/a/chrome si no lo encuentra solo
@@ -78,6 +80,25 @@ make check        # CHROME_PATH=/ruta/a/chrome si no lo encuentra solo
 Cloudflare Pages publica `src/` automáticamente: cada push a `main` va a producción y cada PR genera una vista previa.
 
 Las versiones siguen [SemVer](https://semver.org/lang/es/) y se anotan en [CHANGELOG.md](CHANGELOG.md). Un tag `vX.Y.Z` firmado sobre `main` crea la [GitHub Release](https://github.com/airvzxf/exponent-dimensions/releases) con el zip de `src/` y, después, un workflow comprueba que producción sirve exactamente esos archivos. El proceso completo está en [AGENTS.md](AGENTS.md).
+
+### Versiones
+
+Producción guarda JS y CSS en la caché del navegador durante un año (`max-age=31536000`), mientras que el HTML no se guarda (`max-age=0`). Para que un visitante nunca combine el HTML nuevo con un script viejo, cada recurso local lleva la versión en la URL:
+
+- `styles.css?v=X.Y.Z` y `app.js?v=X.Y.Z` en `src/index.html`;
+- los `import` relativos entre módulos (`./i18n.js?v=X.Y.Z`, `./scene3d.js?v=X.Y.Z`).
+
+Cloudflare Pages ignora el query string al servir: solo cambia la clave de caché del navegador.
+
+**La versión sube en el mismo PR que cambia JS o CSS de `src/`**, porque Pages publica en cuanto se fusiona y un PR de release posterior llegaría tarde. Ese PR es el de release y debe cambiar:
+
+1. `VERSION` con `X.Y.Z`;
+2. todos los `?v=` de `src/` (`grep -rn '?v=' src/`);
+3. la sección `## [X.Y.Z] - AAAA-MM-DD` del CHANGELOG, con su enlace de comparación al pie.
+
+Después del merge se crea el tag firmado `vX.Y.Z` sobre el commit del merge en `main`. Los PRs que no tocan JS ni CSS de `src/` (documentación, CI, pruebas, Dependabot de herramientas) no necesitan versión nueva.
+
+Dos comprobaciones lo vigilan: `make unit` falla si algún recurso o import local no lleva `?v=` igual a `VERSION`, y el job **Asset version bumped** del CI falla en un PR que cambia `src/*.js` o `src/*.css` sin subir `VERSION`.
 
 ## Tecnologías
 
