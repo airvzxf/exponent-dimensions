@@ -172,5 +172,8 @@ jobs:
         with:
           name: lighthouse-report
           path: .lighthouseci/
+          # .lighthouseci/ empieza con punto: sin esto upload-artifact lo
+          # trata como oculto y no sube nada.
+          include-hidden-files: true
           retention-days: 14
-          if-no-files-found: ignore
+          if-no-files-found: warn
