@@ -23,6 +23,9 @@ const es = {
     footerSource: 'Ver',
     footerSourceLink: 'código fuente',
     unitLabel: '1 u',
+    plotLink: 'Ver exponentes negativos y la cancelación nᵏ · n⁻ᵏ = 1 →',
+    plotNote: (p) => `Abre ${p} en el visualizador de exponentes positivos y negativos.`,
+    plotClipped: (p) => `Se muestra ${p}: allá la base llega hasta 4.`,
 
     steps(B, E, result) {
         if (E === 0) return 'Producto vacío: sin multiplicar nada queda 1 (el elemento neutro).';
@@ -80,6 +83,9 @@ const en = {
     footerSource: 'View the',
     footerSourceLink: 'source code',
     unitLabel: '1 u',
+    plotLink: 'See negative exponents and the cancellation nᵏ · n⁻ᵏ = 1 →',
+    plotNote: (p) => `Opens ${p} in the positive and negative exponents visualizer.`,
+    plotClipped: (p) => `Shows ${p}: the base there only goes up to 4.`,
 
     steps(B, E, result) {
         if (E === 0) return 'Empty product: multiplying nothing leaves 1 (the identity element).';

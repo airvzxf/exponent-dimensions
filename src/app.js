@@ -1,4 +1,5 @@
-import { STRINGS, LANGS } from './i18n.js?v=1.0.1';
+import { STRINGS, LANGS } from './i18n.js?v=1.1.0';
+import { plotLink, power } from './plot-link.js?v=1.1.0';
 
 // --- Estado de la aplicación ---
 const MIN_BASE = 1;
@@ -40,6 +41,8 @@ const error3dText = $('error-3d-text');
 const retry3dBtn = $('retry-3d-btn');
 const viewportContainer = $('viewport-container');
 const scrollToTopBtn = $('scroll-to-top');
+const plotLinkEl = $('plot-link');
+const plotNote = $('plot-note');
 const ctx2d = canvas2d.getContext('2d');
 
 const t = () => STRINGS[state.lang];
@@ -153,6 +156,16 @@ function updateControls() {
     labelsToggle.checked = state.labels;
     resetCameraBtn.hidden = E !== 3;
     buildBtn.disabled = E === 0;
+}
+
+// Enlace a exponent-plot con la misma potencia (base recortada a 4 si hace falta)
+function updatePlotLink() {
+    const s = t();
+    const link = plotLink(state.base, state.exponent, state.lang);
+    const note = link.clipped ? s.plotClipped(power(link.base, link.exponent)) : s.plotNote(power(link.base, link.exponent));
+    plotLinkEl.href = link.url;
+    plotLinkEl.title = note;
+    plotNote.textContent = note;
 }
 
 // --- Dibujo 0D, 1D y 2D en canvas ---
@@ -370,7 +383,7 @@ let scene3dPromise = null;
 
 function load3D() {
     if (!scene3dPromise) {
-        scene3dPromise = import('./scene3d.js?v=1.0.1')
+        scene3dPromise = import('./scene3d.js?v=1.1.0')
             .then(({ createScene3D }) => {
                 scene3d = createScene3D(container3d, { getUnitColor, reducedMotion: reducedMotion() });
                 scene3d.setBase(state.base);
@@ -403,6 +416,7 @@ async function show3D() {
 function render() {
     updateControls();
     updateMath();
+    updatePlotLink();
 
     const is3D = state.exponent === 3;
     canvas2d.classList.toggle('active', !is3D);

@@ -7,6 +7,21 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-23
+
+### Añadido
+
+- **Enlace a [exponent-plot](https://exponent-plot.rovisoft.net/):**
+  "Ver exponentes negativos y la cancelación nᵏ · n⁻ᵏ = 1 →", bajo el
+  título y visible sin desplazar en escritorio y móvil. Abre la misma
+  potencia y el mismo idioma con el formato `#b=<base>&e=<exponente>&lang=<es|en>`
+  y se actualiza al mover los controles. Allá la base llega hasta 4: si
+  aquí es mayor, se muestra con base 4 y una descripción accesible
+  (`aria-describedby` y `title`) lo avisa, por ejemplo "Se muestra 4³:
+  allá la base llega hasta 4".
+- Pruebas unitarias del mapeo (incluidos los recortes) y comprobaciones
+  del enlace en la prueba de humo.
+
 ## [1.0.1] - 2026-11-23
 
 ### Corregido
@@ -81,6 +96,7 @@ Primera versión numerada. Hasta ahora el sitio se publicaba sin versiones.
 - El texto inicial de la página coincide con lo que dibuja la app.
 - Las etiquetas del formulario apuntan a su control.
 
+[1.1.0]: https://github.com/airvzxf/exponent-dimensions/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/airvzxf/exponent-dimensions/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/airvzxf/exponent-dimensions/releases/tag/v1.0.0
-[Unreleased]: https://github.com/airvzxf/exponent-dimensions/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/airvzxf/exponent-dimensions/compare/v1.1.0...HEAD

@@ -47,7 +47,7 @@ test('cada recurso local de index.html lleva ?v=VERSION', () => {
 
 test('cada import relativo entre módulos lleva ?v=VERSION', () => {
     // Sin esto, la prueba pasaría también si la expresión regular dejara de encontrar imports
-    assert.deepEqual(imports.map(({ spec }) => fileOf(spec)).sort(), ['i18n.js', 'scene3d.js']);
+    assert.deepEqual(imports.map(({ spec }) => fileOf(spec)).sort(), ['i18n.js', 'plot-link.js', 'scene3d.js']);
     for (const { file, spec } of imports) {
         assert.equal(spec.split('?')[1], `v=${VERSION}`, `${file}: ${spec}`);
         assert.ok(existsSync(join(SRC, fileOf(spec))), `${file}: falta src/${fileOf(spec)}`);

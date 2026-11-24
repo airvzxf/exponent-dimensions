@@ -136,6 +136,31 @@ try {
         && (await text(page, 'math-steps')).startsWith('Operation:'));
     check('título traducido', (await page.title()).startsWith('Powers in Dimensions'), await page.title());
 
+    console.log('Enlace a exponent-plot');
+    const plot = (p) => p.$eval('#plot-link', (a) => {
+        const note = document.getElementById(a.getAttribute('aria-describedby'));
+        return { href: a.href, title: a.title, note: note?.textContent ?? '', text: a.textContent };
+    });
+    await open(page, BASE, 'b=7&e=2&lang=en');
+    let link = await plot(page);
+    check('#b=7&e=2&lang=en enlaza a b=4&e=2&lang=en', link.href === 'https://exponent-plot.rovisoft.net/#b=4&e=2&lang=en', link.href);
+    check('avisa del recorte en aria-describedby y title', link.note.includes('4²') && link.note.includes('up to 4') && link.title === link.note, link.note);
+    check('texto del enlace en inglés', link.text.startsWith('See negative exponents'), link.text);
+    await page.$eval('#base-slider', (s) => { s.value = 3; s.dispatchEvent(new Event('input')); });
+    await page.click('label.exp-btn:has(input[value="3"])');
+    await sleep(300);
+    link = await plot(page);
+    check('el enlace sigue a los controles (3³)', link.href === 'https://exponent-plot.rovisoft.net/#b=3&e=3&lang=en', link.href);
+    check('sin recorte no hay aviso de recorte', !link.note.includes('up to 4') && link.note.includes('3³'), link.note);
+    await page.click('.lang-btn[data-lang="es"]');
+    link = await plot(page);
+    check('el enlace sigue al idioma', link.href.endsWith('&lang=es') && link.text.startsWith('Ver exponentes negativos'), `${link.href} ${link.text}`);
+    const inView = await page.$eval('#plot-link', (a) => {
+        const r = a.getBoundingClientRect();
+        return r.top >= 0 && r.bottom <= window.innerHeight && r.width > 0;
+    });
+    check('enlace visible sin desplazar (escritorio)', inView);
+
     check('sin errores de consola ni de red', errors.length === 0, errors.join(' | '));
 
     console.log('Móvil');
@@ -147,6 +172,11 @@ try {
     check('sin scroll horizontal a 360 px', overflow <= 0, `${overflow}px de más`);
     const canvasPixels = await mobile.$eval('#canvas-2d', (c) => c.width);
     check('canvas a resolución física (DPR 2)', canvasPixels >= 700, `${canvasPixels}px`);
+    const mobileInView = await mobile.$eval('#plot-link', (a) => {
+        const r = a.getBoundingClientRect();
+        return r.top >= 0 && r.bottom <= window.innerHeight && r.right <= window.innerWidth && r.width > 0;
+    });
+    check('enlace visible sin desplazar (móvil)', mobileInView);
     check('móvil sin errores', mobileErrors.length === 0, mobileErrors.join(' | '));
 
     console.log('CDN de Three.js caído');
